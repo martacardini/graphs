@@ -1,0 +1,41 @@
+# Bar plot of species at each distance from the road
+
+# Create a custom color scale
+myCol <- c(viridis::viridis(n = 165))       #n = total number of species
+
+library(scales) #create custom palette
+names(myCol) <- colnames(plantsonly_subplot_abd)
+
+## select plots at 0m ----
+plants_distance0 <- tot_abd %>% filter(., distance_road ==0) %>% 
+  select(ind.id, c(22:ncol(tot_abd))) 
+
+
+## barplot
+
+# 0m
+abd_028_1_0 <- plants_distance0 %>% filter(ind.id %in% '028_1_0') %>% select(-ind.id, -testsp)     #select one subplot
+
+abd_028_1_0t <- as.data.frame(t(abd_028_1_0))
+cls <- c('plant_species', 'abundance')
+abd_028_1_0t <- abd_028_1_0t %>% rownames_to_column() 
+colnames(abd_028_1_0t) <- cls
+abd_028_1_0t <- filter_if(abd_028_1_0t, is.numeric, all_vars((.) != 0)) # remove plant sp not present in the subplot
+
+bp0 <- ggplot(data=abd_028_1_0t, aes(x=plant_species, y=abundance, fill=plant_species, check_overlap = T)) +
+  geom_bar(stat="identity")+
+  geom_text(aes(label=abundance), vjust=-0.3, size=3.5, check_overlap = T)+
+  theme_minimal()+
+  scale_fill_manual(values = myCol, name="Plant species")+
+  # scale_fill_viridis_d()+
+  ggtitle("Plant species cover in subplot 028_1_0") + 
+  scale_y_continuous(name = "Species cover")+
+  theme(axis.text.x = element_text(size = 15, angle = 70, hjust = 1)) + 
+  theme(legend.title = element_text(size=20),
+        legend.text = element_text(size=15),
+       # axis.text.x = element_text(size = 13, angle = 55, hjust = 1),
+        axis.title.y = element_text(size= 13),
+       axis.title.x = element_blank())+
+  theme(plot.title = element_text(size = 20, face = "bold"))
+
+bp0 
